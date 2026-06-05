@@ -1,0 +1,37 @@
+import { Request, Response, NextFunction } from 'express';
+import * as analysisService from './analysis.service';
+import { successResponse, errorResponse } from '../../utils/response';
+
+export async function analyzeMeeting(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const userId = req.userId!;
+    const meetingId = req.params.id;
+
+    const result = await analysisService.analyzeMeeting(userId, meetingId, req.traceId);
+
+    if (result.error === 'NOT_FOUND') {
+      res.status(404).json(
+        errorResponse('NOT_FOUND', 'Meeting not found', req.traceId)
+      );
+      return;
+    }
+
+    if (result.error === 'CONFLICT') {
+      res.status(409).json(
+        errorResponse('CONFLICT', 'Analysis already exists for this meeting', req.traceId)
+      );
+      return;
+    }
+
+    if (result.error === 'LLM_ERROR') {
+      res.status(502).json(
+        errorResponse('LLM_ERROR', result.message || 'AI analysis failed after retry', req.traceId)
+      );
+      return;
+    }
+
+    res.status(200).json(successResponse(result.analysis, req.traceId));
+  } catch (err) {
+    next(err);
+  }
+}

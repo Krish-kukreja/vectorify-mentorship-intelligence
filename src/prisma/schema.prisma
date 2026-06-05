@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  meetings     Meeting[]
+}
+
+model Meeting {
+  id           String           @id @default(uuid())
+  userId       String
+  user         User             @relation(fields: [userId], references: [id])
+  title        String
+  participants String[]
+  meetingDate  DateTime
+  transcript   Json
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  analysis     MeetingAnalysis?
+  actionItems  ActionItem[]
+}
+
+model MeetingAnalysis {
+  id                String   @id @default(uuid())
+  meetingId         String   @unique
+  meeting           Meeting  @relation(fields: [meetingId], references: [id])
+  summary           Json
+  actionItems       Json
+  decisions         Json
+  followUpSuggestions Json
+  createdAt         DateTime @default(now())
+}
+
+model ActionItem {
+  id        String       @id @default(uuid())
+  meetingId String
+  meeting   Meeting      @relation(fields: [meetingId], references: [id])
+  task      String
+  assignee  String
+  status    ActionStatus @default(PENDING)
+  dueDate   DateTime?
+  citations Json?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  reminders ReminderLog[]
+}
+
+enum ActionStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
+
+model ReminderLog {
+  id             String     @id @default(uuid())
+  actionItemId   String
+  actionItem     ActionItem @relation(fields: [actionItemId], references: [id])
+  channel        String
+  deliveryStatus String
+  response       String?
+  sentAt         DateTime   @default(now())
+}
