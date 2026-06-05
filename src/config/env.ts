@@ -28,7 +28,7 @@ function validateEnv(): EnvConfig {
     DATABASE_URL: getEnvVar('DATABASE_URL'),
     GEMINI_API_KEY: getEnvVar('GEMINI_API_KEY'),
     RESEND_API_KEY: getEnvVar('RESEND_API_KEY'),
-    REMINDER_CRON_SCHEDULE: getEnvVar('REMINDER_CRON_SCHEDULE', false) || '0 9 * * *',
+    REMINDER_CRON_SCHEDULE: getEnvVar('REMINDER_CRON_SCHEDULE', false) || '*/5 * * * *',
   };
 }
 
