@@ -13,7 +13,6 @@
     "prisma:push": "prisma db push --schema=src/prisma/schema.prisma"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.21.0",
     "@prisma/client": "^5.22.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
@@ -21,6 +20,7 @@
     "escape-html": "^1.0.3",
     "express": "^4.18.2",
     "express-rate-limit": "^8.5.2",
+    "groq-sdk": "^1.2.1",
     "helmet": "^8.2.0",
     "hpp": "^0.2.3",
     "jsonwebtoken": "^9.0.2",

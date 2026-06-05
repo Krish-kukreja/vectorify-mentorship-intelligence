@@ -8,6 +8,7 @@ interface EnvConfig {
   NODE_ENV: string;
   JWT_SECRET: string;
   DATABASE_URL: string;
+  // LLM API key (Groq)
   GEMINI_API_KEY: string;
   RESEND_API_KEY: string;
   REMINDER_CRON_SCHEDULE: string;

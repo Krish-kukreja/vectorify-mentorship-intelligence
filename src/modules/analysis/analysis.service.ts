@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import Groq from 'groq-sdk';
 import { Prisma } from '@prisma/client';
 import { prisma } from '../../utils/prisma';
 import { env } from '../../config/env';
@@ -9,22 +9,23 @@ import { validateCitations } from './analysis.validator';
 const REQUIRED_KEYS = ['summary', 'actionItems', 'decisions', 'followUpSuggestions'];
 
 async function callGemini(prompt: string): Promise<string> {
-  const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({
-    model: 'gemini-1.5-flash',
-    generationConfig: {
-      responseMimeType: 'application/json',
-    },
-  });
+  const groq = new Groq({ apiKey: env.GEMINI_API_KEY });
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 30000); // 30 seconds
 
   try {
-    const result = await model.generateContent(prompt, { signal: controller.signal });
+    const response = await groq.chat.completions.create(
+      {
+        model: 'llama-3.1-8b-instant',
+        messages: [{ role: 'user', content: prompt }],
+        response_format: { type: 'json_object' },
+        temperature: 0.1,
+      },
+      { signal: controller.signal } as any // Adding signal to request options
+    );
     clearTimeout(timeout);
-    const response = result.response;
-    return response.text();
+    return response.choices[0].message.content || '{}';
   } catch (err: any) {
     clearTimeout(timeout);
     if (err.name === 'AbortError') {

@@ -25,7 +25,7 @@ export async function createActionItem(userId: string, data: CreateActionItemInp
       task: data.task,
       assignee: data.assignee,
       dueDate: data.dueDate ? new Date(data.dueDate) : null,
-      citations: (data.citations as unknown as Prisma.InputJsonValue) || [],
+      citations: (data.citations as any) || [],
     },
   });
 

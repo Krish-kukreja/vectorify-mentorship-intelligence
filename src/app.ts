@@ -85,7 +85,7 @@ app.get('/api/evaluation', (req, res) => {
     successResponse(
       {
         candidateName: 'Krish Kukreja',
-        email: 'your.actual.email@example.com',
+        email: 'iamkrish.kukreja@gmail.com',
         repositoryUrl: 'https://github.com/Krish-kukreja/hintro-meeting-intelligence',
         deployedUrl: 'https://placeholder.up.railway.app',
         externalIntegration: 'Resend Email API',
