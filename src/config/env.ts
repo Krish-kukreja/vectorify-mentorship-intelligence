@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import { validate as validateCron } from 'node-cron';
 
 dotenv.config();
 
@@ -33,3 +34,7 @@ function validateEnv(): EnvConfig {
 }
 
 export const env: EnvConfig = validateEnv();
+
+if (!validateCron(env.REMINDER_CRON_SCHEDULE)) {
+  throw new Error(`Invalid REMINDER_CRON_SCHEDULE: ${env.REMINDER_CRON_SCHEDULE}`);
+}
