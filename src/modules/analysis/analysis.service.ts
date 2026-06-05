@@ -113,10 +113,10 @@ export async function analyzeMeeting(userId: string, meetingId: string, traceId:
   const savedAnalysis = await prisma.meetingAnalysis.create({
     data: {
       meetingId,
-      summary: cleanedAnalysis.summary as unknown as Prisma.InputJsonValue,
-      actionItems: cleanedAnalysis.actionItems as unknown as Prisma.InputJsonValue,
-      decisions: cleanedAnalysis.decisions as unknown as Prisma.InputJsonValue,
-      followUpSuggestions: cleanedAnalysis.followUpSuggestions as unknown as Prisma.InputJsonValue,
+      summary: cleanedAnalysis.summary as any,
+      actionItems: cleanedAnalysis.actionItems as any,
+      decisions: cleanedAnalysis.decisions as any,
+      followUpSuggestions: cleanedAnalysis.followUpSuggestions as any,
     },
   });
 
