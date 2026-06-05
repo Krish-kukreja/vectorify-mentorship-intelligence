@@ -17,9 +17,21 @@ async function callGemini(prompt: string): Promise<string> {
     },
   });
 
-  const result = await model.generateContent(prompt);
-  const response = result.response;
-  return response.text();
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30000); // 30 seconds
+
+  try {
+    const result = await model.generateContent(prompt, { signal: controller.signal });
+    clearTimeout(timeout);
+    const response = result.response;
+    return response.text();
+  } catch (err: any) {
+    clearTimeout(timeout);
+    if (err.name === 'AbortError') {
+      throw new Error('LLM_ERROR: Request timeout');
+    }
+    throw err;
+  }
 }
 
 async function callGeminiWithRetry(prompt: string, traceId: string): Promise<string> {

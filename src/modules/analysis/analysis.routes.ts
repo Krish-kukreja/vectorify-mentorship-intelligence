@@ -1,10 +1,22 @@
 import { Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import { authenticate } from '../../middleware/auth';
 import { validate } from '../../middleware/validate';
 import { UuidParamSchema } from '../../utils/uuid.schema';
 import * as analysisController from './analysis.controller';
 
 const router = Router();
+
+// FIX 8: Analyze Route Rate Limiter (Protect Gemini API)
+const analysisLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 10, // 10 requests per user
+  keyGenerator: (req: any) => req.userId,
+  message: 'Analysis limit reached, try again later',
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: () => process.env.NODE_ENV === 'test',
+});
 
 /**
  * @swagger
@@ -96,6 +108,6 @@ const router = Router();
  *       502:
  *         description: AI analysis failed after retry (LLM_ERROR)
  */
-router.post('/:id/analyze', authenticate, validate(UuidParamSchema, 'params'), analysisController.analyzeMeeting);
+router.post('/:id/analyze', authenticate, analysisLimiter, validate(UuidParamSchema, 'params'), analysisController.analyzeMeeting);
 
 export default router;

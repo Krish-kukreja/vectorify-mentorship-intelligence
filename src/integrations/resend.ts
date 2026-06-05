@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import escapeHtml from 'escape-html';
 import logger from '../utils/logger';
 import { env } from '../config/env';
 
@@ -9,20 +10,6 @@ interface ActionItemForEmail {
   task: string;
   assignee: string;
   dueDate: Date | null;
-}
-
-/**
- * Escape HTML special characters to prevent XSS in email templates.
- * Covers the OWASP-recommended set: & < > " ' /
- */
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;')
-    .replace(/\//g, '&#x2F;');
 }
 
 export async function sendReminderEmail(

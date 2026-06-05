@@ -27,7 +27,7 @@ function validateEnv(): EnvConfig {
 
   // Enforce minimum JWT secret length for security
   if (jwtSecret.length < 32) {
-    throw new Error('JWT_SECRET must be at least 32 characters long for security');
+    throw new Error('JWT_SECRET must be at least 32 characters');
   }
 
   return {

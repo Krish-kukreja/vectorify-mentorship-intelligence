@@ -1,9 +1,22 @@
 import { Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import { validate } from '../../middleware/validate';
 import { RegisterSchema, LoginSchema } from './auth.schema';
 import * as authController from './auth.controller';
 
 const router = Router();
+
+// FIX 7: Auth Route Rate Limiter (Stricter)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // 5 requests per IP
+  message: 'Too many authentication attempts, please try again later',
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: () => process.env.NODE_ENV === 'test',
+});
+
+router.use(authLimiter);
 
 /**
  * @swagger
