@@ -10,7 +10,7 @@ export async function register(req: Request, res: Response, next: NextFunction):
     const user = await authService.register(email, password);
 
     res.status(201).json(successResponse(user, req.traceId));
-  } catch (err) {
+  } catch (err: any) {
     if (
       err instanceof Prisma.PrismaClientKnownRequestError &&
       err.code === 'P2002'
@@ -43,7 +43,7 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
     }
 
     res.status(200).json(successResponse(result, req.traceId));
-  } catch (err) {
+  } catch (err: any) {
     next(err);
   }
 }
