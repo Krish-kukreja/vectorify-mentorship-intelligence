@@ -1,0 +1,30 @@
+version: '3.8'
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+      - JWT_SECRET=your-jwt-secret-here
+      - DATABASE_URL=postgresql://postgres:password@db:5432/hintro_db
+      - GEMINI_API_KEY=your-groq-key-here
+      - RESEND_API_KEY=your-resend-key-here
+      - REMINDER_CRON_SCHEDULE=*/5 * * * *
+    depends_on:
+      - db
+    command: sh -c "npx prisma migrate deploy && node dist/server.js"
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=hintro_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
