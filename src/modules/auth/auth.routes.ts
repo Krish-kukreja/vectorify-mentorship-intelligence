@@ -6,7 +6,7 @@ import * as authController from './auth.controller';
 
 const router = Router();
 
-// Stricter rate limiting for authentication routes to prevent brute-force credential stuffing
+// Cranking up the rate limit here so nobody can brute-force our login
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 5, // 5 requests per IP

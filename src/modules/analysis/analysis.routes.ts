@@ -7,7 +7,7 @@ import * as analysisController from './analysis.controller';
 
 const router = Router();
 
-// Strict rate limiting to protect LLM API endpoints and manage quota usage
+// The Groq API costs money, so let's limit how often people can hit this
 const analysisLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 10, // 10 requests per user
