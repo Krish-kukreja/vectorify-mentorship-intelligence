@@ -8,7 +8,7 @@ import { validateCitations } from './analysis.validator';
 
 const REQUIRED_KEYS = ['summary', 'actionItems', 'decisions', 'followUpSuggestions'];
 
-async function callGemini(prompt: string): Promise<string> {
+async function callLLM(prompt: string): Promise<string> {
   const groq = new Groq({ apiKey: env.GEMINI_API_KEY });
 
   const controller = new AbortController();
@@ -35,11 +35,11 @@ async function callGemini(prompt: string): Promise<string> {
   }
 }
 
-async function callGeminiWithRetry(prompt: string, traceId: string): Promise<string> {
+async function callLLMWithRetry(prompt: string, traceId: string): Promise<string> {
   try {
-    return await callGemini(prompt);
+    return await callLLM(prompt);
   } catch (firstError) {
-    logger.warn('Gemini API first attempt failed, retrying in 1s', {
+    logger.warn('LLM API first attempt failed, retrying in 1s', {
       traceId,
       error: (firstError as Error).message,
     });
@@ -47,9 +47,9 @@ async function callGeminiWithRetry(prompt: string, traceId: string): Promise<str
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     try {
-      return await callGemini(prompt);
+      return await callLLM(prompt);
     } catch (retryError) {
-      logger.error('Gemini API retry also failed', {
+      logger.error('LLM API retry also failed', {
         traceId,
         error: (retryError as Error).message,
       });
@@ -78,13 +78,13 @@ export async function analyzeMeeting(userId: string, meetingId: string, traceId:
     return { error: 'CONFLICT', existing: meeting.analysis };
   }
 
-  // 3. Build prompt and call Gemini
+  // 3. Build prompt and call LLM
   const transcript = meeting.transcript as any[];
   const prompt = buildPrompt(transcript);
 
   let responseText: string;
   try {
-    responseText = await callGeminiWithRetry(prompt, traceId);
+    responseText = await callLLMWithRetry(prompt, traceId);
   } catch (err) {
     return { error: 'LLM_ERROR', message: (err as Error).message };
   }
@@ -94,14 +94,14 @@ export async function analyzeMeeting(userId: string, meetingId: string, traceId:
   try {
     analysisData = JSON.parse(responseText);
   } catch {
-    logger.error('Gemini returned invalid JSON', { traceId, responseText: responseText.substring(0, 500) });
+    logger.error('LLM returned invalid JSON', { traceId, responseText: responseText.substring(0, 500) });
     return { error: 'LLM_ERROR', message: 'Invalid JSON response from LLM' };
   }
 
   // 5. Validate required keys
   for (const key of REQUIRED_KEYS) {
     if (!Array.isArray(analysisData[key])) {
-      logger.error('Gemini response missing required key', { traceId, missingKey: key });
+      logger.error('LLM response missing required key', { traceId, missingKey: key });
       return { error: 'LLM_ERROR', message: `Missing required key: ${key}` };
     }
   }

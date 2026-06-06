@@ -48,12 +48,15 @@ jest.mock('../config/env', () => ({
   },
 }));
 
-// Mock Gemini (needed because analysis routes are mounted)
-jest.mock('@google/generative-ai', () => ({
-  GoogleGenerativeAI: jest.fn().mockImplementation(() => ({
-    getGenerativeModel: jest.fn().mockReturnValue({
-      generateContent: jest.fn(),
-    }),
+// Mock Groq (needed because analysis routes are mounted)
+jest.mock('groq-sdk', () => ({
+  __esModule: true,
+  default: jest.fn().mockImplementation(() => ({
+    chat: {
+      completions: {
+        create: jest.fn(),
+      },
+    },
   })),
 }));
 

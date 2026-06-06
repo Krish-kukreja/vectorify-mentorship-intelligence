@@ -41,21 +41,24 @@ jest.mock('../config/env', () => ({
   },
 }));
 
-// Mock Gemini SDK
-jest.mock('@google/generative-ai', () => {
-  const mockGenerateContent = jest.fn();
+// Mock Groq SDK
+jest.mock('groq-sdk', () => {
+  const mockCreate = jest.fn();
   return {
-    GoogleGenerativeAI: jest.fn().mockImplementation(() => ({
-      getGenerativeModel: jest.fn().mockReturnValue({
-        generateContent: mockGenerateContent,
-      }),
+    __esModule: true,
+    default: jest.fn().mockImplementation(() => ({
+      chat: {
+        completions: {
+          create: mockCreate,
+        },
+      },
     })),
-    __mockGenerateContent: mockGenerateContent,
+    __mockCreate: mockCreate,
   };
 });
 
 const mockedPrisma = prisma as jest.Mocked<typeof prisma>;
-const { __mockGenerateContent: mockGenerateContent } = jest.requireMock('@google/generative-ai');
+const { __mockCreate: mockGenerateContent } = jest.requireMock('groq-sdk');
 
 const TEST_USER_ID = 'user-uuid-123';
 const MEETING_ID = 'meeting-uuid-456';
@@ -117,9 +120,9 @@ describe('Analysis Module', () => {
       (mockedPrisma.actionItem.createMany as jest.Mock).mockResolvedValue({ count: 1 });
 
       mockGenerateContent.mockResolvedValue({
-        response: {
-          text: () => JSON.stringify(mockGeminiResponse),
-        },
+        choices: [
+          { message: { content: JSON.stringify(mockGeminiResponse) } }
+        ]
       });
 
       const res = await request(app)
@@ -177,12 +180,12 @@ describe('Analysis Module', () => {
       expect(res.body.error.code).toBe('NOT_FOUND');
     });
 
-    it('should return 502 LLM_ERROR when Gemini fails twice', async () => {
+    it('should return 502 LLM_ERROR when LLM fails twice', async () => {
       (mockedPrisma.meeting.findUnique as jest.Mock).mockResolvedValue(mockMeetingNoAnalysis);
 
       mockGenerateContent
-        .mockRejectedValueOnce(new Error('Gemini rate limited'))
-        .mockRejectedValueOnce(new Error('Gemini still failing'));
+        .mockRejectedValueOnce(new Error('LLM rate limited'))
+        .mockRejectedValueOnce(new Error('LLM still failing'));
 
       const res = await request(app)
         .post(`/api/meetings/${MEETING_ID}/analyze`)
