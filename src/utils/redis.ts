@@ -1,6 +1,6 @@
 import Redis from 'ioredis';
 import { env } from '../config/env';
-import { logger } from './logger';
+import logger from './logger';
 
 const redisUrl = env.REDIS_URL || 'redis://localhost:6379';
 
