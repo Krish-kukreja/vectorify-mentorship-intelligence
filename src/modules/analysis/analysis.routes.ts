@@ -25,7 +25,7 @@ const analysisLimiter = rateLimit({
  *     summary: Run AI analysis on a meeting transcript
  *     description: |
  *       Sends the meeting transcript to the Groq LLM API for analysis.
- *       Returns summary, actionItems, decisions, and followUpSuggestions — all with validated citations.
+ *       Returns summary, actionItems, decisions, and followUpSuggestions - all with validated citations.
  *       Retries once on LLM failure before returning 502.
  *       Auto-creates ActionItem records from the analysis result.
  *     tags: [Analysis]

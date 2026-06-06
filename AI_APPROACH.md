@@ -68,7 +68,7 @@ The Groq API is configured with `responseMimeType: 'application/json'`:
 
 ```typescript
 const model = genAI.getGenerativeModel({
-  model: 'gemini-1.5-flash',
+  model: 'llama3-8b-8192',
   generationConfig: {
     responseMimeType: 'application/json',
   },

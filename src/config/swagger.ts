@@ -6,7 +6,7 @@ const swaggerOptions: swaggerJsdoc.Options = {
     info: {
       title: 'Meeting Intelligence API',
       version: '1.0.0',
-      description: 'Hintro Meeting Intelligence Service — AI-powered meeting analysis, action item tracking, and automated reminders.',
+      description: 'Hintro Meeting Intelligence Service - AI-powered meeting analysis, action item tracking, and automated reminders.',
       contact: {
         name: 'Hintro API Support',
       },

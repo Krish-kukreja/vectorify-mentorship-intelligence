@@ -62,7 +62,7 @@ router.use(authenticate);
  *       400:
  *         description: Validation error
  *       401:
- *         description: Unauthorized — missing or invalid JWT
+ *         description: Unauthorized - missing or invalid JWT
  */
 router.post('/', validate(CreateMeetingSchema), meetingsController.createMeeting);
 
