@@ -1,6 +1,6 @@
 # AI Approach
 
-This document describes the design of the AI analysis pipeline — prompt engineering, grounding strategy, citation validation, and JSON enforcement.
+This document describes the design of the AI analysis pipeline - prompt engineering, grounding strategy, citation validation, and JSON enforcement.
 
 ---
 
@@ -19,19 +19,19 @@ STRICT RULES:
 **Why these rules matter:**
 
 - **Rule 1** prevents the model from using its training data to "fill in" plausible but fabricated meeting content.
-- **Rule 2** explicitly bans hallucination of entities — the most dangerous failure mode in meeting analysis.
-- **Rule 3** forces citation grounding — every claim must reference a specific transcript timestamp.
+- **Rule 2** explicitly bans hallucination of entities - the most dangerous failure mode in meeting analysis.
+- **Rule 3** forces citation grounding - every claim must reference a specific transcript timestamp.
 - **Rule 4** tells the model that omission is preferred over fabrication, which is the correct default for business-critical analysis.
 
 ---
 
-## Grounding Strategy — No Hallucination
+## Grounding Strategy - No Hallucination
 
 The transcript is injected as a JSON array into the prompt via `JSON.stringify()`. Each entry has a `timestamp`, `speaker`, and `text` field. The model is instructed to only reference timestamps that exist in this array.
 
 **Design principle:** The model can only claim what is traceable. If a citation points to timestamp `"00:05"`, anyone can look up exactly what was said at `00:05` in the original transcript.
 
-This is a lightweight version of the RAG (Retrieval-Augmented Generation) pattern — instead of retrieving from a vector store, we inject the full context directly and constrain the output to reference it.
+This is a lightweight version of the RAG (Retrieval-Augmented Generation) pattern - instead of retrieving from a vector store, we inject the full context directly and constrain the output to reference it.
 
 ---
 
@@ -58,13 +58,13 @@ item.citations = item.citations.filter((citation) =>
 **What happens to invalid citations?**
 - They are silently stripped from the response.
 - A `logger.warn()` entry is created for each stripped citation, including the invalid timestamp and the section it came from.
-- The analysis is still saved — we don't reject it entirely because partial grounding is better than no analysis.
+- The analysis is still saved - we don't reject it entirely because partial grounding is better than no analysis.
 
 ---
 
 ## JSON Mode Enforcement
 
-The Gemini API is configured with `responseMimeType: 'application/json'`:
+The Groq API is configured with `responseMimeType: 'application/json'`:
 
 ```typescript
 const model = genAI.getGenerativeModel({
@@ -93,7 +93,7 @@ Attempt 1 → fail → wait 1s → Attempt 2 → fail → return 502 LLM_ERROR
 ```
 
 **Why only one retry?**
-- Gemini's free tier has rate limits. Aggressive retrying can exhaust the quota.
+- Groq's free tier has rate limits. Aggressive retrying can exhaust the quota.
 - A single retry handles transient network errors and brief rate limit windows.
 - If both attempts fail, the error is propagated to the client as a clear `LLM_ERROR` with a 502 status.
 

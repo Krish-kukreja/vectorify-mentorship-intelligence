@@ -1,9 +1,9 @@
-# HINTRO CONTEXT — Paste at top of every prompt
+# HINTRO CONTEXT - Paste at top of every prompt
 
 ## Tech Stack
 Node.js 20+, TypeScript 5.x, Express 4.18.2, PostgreSQL 15+, Prisma 5.x
 JWT (jsonwebtoken), bcryptjs, Zod, Winston, node-cron
-Gemini 1.5 Flash, Resend, Jest + Supertest, Swagger UI
+Groq API (LLaMA 3), Resend, Jest + Supertest, Swagger UI
 
 ## Critical Rules
 - Prisma singleton ONLY (src/utils/prisma.ts)
@@ -167,6 +167,6 @@ PORT=3001
 NODE_ENV=development
 JWT_SECRET=<generate-strong-random-32-char-string>
 DATABASE_URL=<from-railway-postgresql-plugin>
-GEMINI_API_KEY=<from-google-ai-studio>
+GROQ_API_KEY=<from-google-ai-studio>
 RESEND_API_KEY=<from-resend-dashboard>
 REMINDER_CRON_SCHEDULE=*/5 * * * *  // every 5 minutes

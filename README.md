@@ -7,7 +7,7 @@ AI-powered meeting analysis backend that extracts insights, tracks action items,
 - **Runtime:** Node.js 20+, TypeScript 5.x
 - **Framework:** Express 4.18.2
 - **Database:** PostgreSQL 15+ with Prisma 5.x ORM
-- **AI:** Google Gemini 1.5 Flash (structured JSON output)
+- **AI:** Google Groq API (LLaMA 3) (structured JSON output)
 - **Email:** Resend (transactional email)
 - **Auth:** JWT (stateless) + bcryptjs
 - **Validation:** Zod
@@ -46,7 +46,7 @@ npm run dev
 | `NODE_ENV` | `development` / `production` / `test` |
 | `JWT_SECRET` | Strong random string (32+ chars) |
 | `DATABASE_URL` | PostgreSQL connection string |
-| `GEMINI_API_KEY` | Google AI Studio API key |
+| `GROQ_API_KEY` | Google AI Studio API key |
 | `RESEND_API_KEY` | Resend dashboard API key |
 | `REMINDER_CRON_SCHEDULE` | Cron expression (default: `*/5 * * * *`) |
 
@@ -91,7 +91,7 @@ npx jest src/__tests__/analysis.test.ts
 npx jest src/__tests__/actionItems.test.ts
 ```
 
-**Test Coverage:** 34 tests across 4 modules — auth (8), meetings (10), analysis (5), action items (11).
+**Test Coverage:** 34 tests across 4 modules - auth (8), meetings (10), analysis (5), action items (11).
 
 ## Deploy to Railway
 
@@ -99,9 +99,9 @@ npx jest src/__tests__/actionItems.test.ts
 2. Go to [railway.app](https://railway.app) → **New Project** → **Deploy from GitHub Repo**
 3. Add a **PostgreSQL** plugin from the Railway dashboard
 4. Set environment variables in **Settings → Variables**:
-   - `DATABASE_URL` — auto-populated by Railway PostgreSQL plugin
-   - `JWT_SECRET`, `GEMINI_API_KEY`, `RESEND_API_KEY` — set manually
-   - `REMINDER_CRON_SCHEDULE` — set to `*/5 * * * *`
+   - `DATABASE_URL` - auto-populated by Railway PostgreSQL plugin
+   - `JWT_SECRET`, `GROQ_API_KEY`, `RESEND_API_KEY` - set manually
+   - `REMINDER_CRON_SCHEDULE` - set to `*/5 * * * *`
 5. Set build command: `npm install && npx prisma generate && npx prisma migrate deploy && npm run build`
 6. Set start command: `npm start`
 7. Deploy triggers automatically on push to `main`
@@ -118,7 +118,7 @@ src/
 ├── modules/
 │   ├── auth/               # register, login
 │   ├── meetings/           # CRUD + pagination
-│   ├── analysis/           # Gemini AI analysis
+│   ├── analysis/           # Groq AI analysis
 │   └── actionItems/        # CRUD + overdue
 ├── prisma/                 # schema.prisma
 ├── utils/                  # prisma.ts, logger.ts, response.ts
