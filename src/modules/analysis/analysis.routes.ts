@@ -7,7 +7,7 @@ import * as analysisController from './analysis.controller';
 
 const router = Router();
 
-// FIX 8: Analyze Route Rate Limiter (Protect Gemini API)
+// Strict rate limiting to protect LLM API endpoints and manage quota usage
 const analysisLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 10, // 10 requests per user
@@ -24,9 +24,9 @@ const analysisLimiter = rateLimit({
  *   post:
  *     summary: Run AI analysis on a meeting transcript
  *     description: |
- *       Sends the meeting transcript to Gemini 1.5 Flash for analysis.
+ *       Sends the meeting transcript to the Groq LLM API for analysis.
  *       Returns summary, actionItems, decisions, and followUpSuggestions — all with validated citations.
- *       Retries once on Gemini failure before returning 502.
+ *       Retries once on LLM failure before returning 502.
  *       Auto-creates ActionItem records from the analysis result.
  *     tags: [Analysis]
  *     security:

@@ -54,7 +54,7 @@ export function errorHandler(
     return;
   }
 
-  // FIX 12: Mask Prisma Errors
+  // Mask Prisma errors to prevent schema leakage to clients
   if (err.name?.startsWith('Prisma') || (err as any).code?.startsWith('P')) {
     logger.error('Database error', { traceId, error: err.message });
     res.status(500).json(

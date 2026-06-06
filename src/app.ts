@@ -18,26 +18,26 @@ import actionItemRoutes from './modules/actionItems/actionItems.routes';
 
 const app = express();
 
-// FIX 1: Add helmet as the VERY FIRST middleware
+// Security: Adds various HTTP headers for protection
 app.use(helmet());
 
-// FIX 2: Add trust proxy
+// Trust proxy required for accurate IP tracking behind reverse proxies (e.g., Railway)
 app.set('trust proxy', 1);
 
-// FIX 4: CORS — KEEP AS IS
+// Enable Cross-Origin Resource Sharing
 app.use(cors({ origin: '*' }));
 
-// FIX 3: Body Size Limit
+// Limit JSON payload size to prevent DOS attacks
 app.use(express.json({ limit: '10kb' }));
 
-// FIX 5: Add hpp() Middleware
+// Prevent HTTP Parameter Pollution attacks
 app.use(hpp());
 
 // Trace ID and request logging
 app.use(traceIdMiddleware);
 app.use(requestLogger);
 
-// FIX 6: Global Rate Limiter
+// Global rate limiting to prevent brute force and DOS attacks
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 10000, // Increased to 10,000 so you don't get blocked while recording the video!
@@ -65,7 +65,7 @@ app.get('/', (req, res) => {
   res.status(200).send('Hintro Meeting Intelligence API is running');
 });
 
-// FIX 15: Deep Health Check
+// Deep Health Check (verifies DB connection)
 app.get('/health', async (req, res) => {
   try {
     await prisma.$queryRaw`SELECT 1`;
@@ -110,7 +110,7 @@ app.get('/api/evaluation', (req, res) => {
   );
 });
 
-// FIX 14: Gate Swagger UI (REMOVED GATE: Assignment requires it to be publicly accessible)
+// API Documentation (Publicly accessible per assignment requirements)
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
   customSiteTitle: 'Hintro API Docs',
   customCss: '.swagger-ui .topbar { display: none }',
@@ -123,7 +123,7 @@ app.use('/api/meetings', meetingRoutes);
 app.use('/api/meetings', analysisRoutes);
 app.use('/api/action-items', actionItemRoutes);
 
-// FIX 13: 404 Catch-All Handler
+// 404 Catch-All Handler
 app.use((req, res) => {
   res.status(404).json(
     errorResponse('NOT_FOUND', `Route ${req.method} ${req.path} not found`, req.traceId)
