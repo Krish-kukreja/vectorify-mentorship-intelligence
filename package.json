@@ -1,7 +1,7 @@
 {
-  "name": "hintro-api",
+  "name": "vectorify-mentorship-intelligence-api",
   "version": "1.0.0",
-  "description": "Hintro Meeting Intelligence Service API",
+  "description": "Vectorify Mentorship Intelligence Service API",
   "main": "dist/server.js",
   "scripts": {
     "build": "tsc --project tsconfig.build.json",

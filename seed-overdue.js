@@ -1,34 +1,29 @@
+require('dotenv').config();
 const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: "postgresql://postgres:xVjViEMLJfXOLBVmNCDlZXBaRUKpmDYm@roundhouse.proxy.rlwy.net:36298/railway"
-    }
-  }
-});
+const prisma = new PrismaClient();
 
 async function main() {
   const user = await prisma.user.create({
     data: {
-      email: 'test@example.com',
+      email: 'mentor@vectorify.in',
       passwordHash: 'fakehash',
     }
   });
 
-  const meeting = await prisma.meeting.create({
+  const session = await prisma.session.create({
     data: {
       userId: user.id,
-      title: 'Test Meeting',
+      title: 'Physics - Rotational Motion Doubt Session',
       participants: ['iamkrish.kukreja@gmail.com'],
-      meetingDate: new Date(),
+      sessionDate: new Date(),
       transcript: []
     }
   });
 
   await prisma.actionItem.create({
     data: {
-      meetingId: meeting.id,
-      task: 'Fix the login bug',
+      sessionId: session.id,
+      task: 'Solve 20 rotational motion problems from DC Pandey',
       assignee: 'iamkrish.kukreja@gmail.com',
       status: 'PENDING',
       dueDate: new Date(Date.now() - 24 * 60 * 60 * 1000)

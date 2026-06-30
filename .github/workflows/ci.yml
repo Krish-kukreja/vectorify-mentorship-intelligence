@@ -15,7 +15,7 @@ jobs:
         image: postgres:15
         env:
           POSTGRES_PASSWORD: password
-          POSTGRES_DB: hintro_test
+          POSTGRES_DB: vectorify_test
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -41,7 +41,7 @@ jobs:
 
       - name: Run tests
         env:
-          DATABASE_URL: postgresql://postgres:password@localhost:5432/hintro_test
+          DATABASE_URL: postgresql://postgres:password@localhost:5432/vectorify_test
           JWT_SECRET: test-jwt-secret-min-32-chars-long-123456789
           GEMINI_API_KEY: test-groq-key-for-ci
           RESEND_API_KEY: test-resend-key-for-ci

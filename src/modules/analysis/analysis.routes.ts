@@ -20,11 +20,11 @@ const analysisLimiter = rateLimit({
 
 /**
  * @swagger
- * /meetings/{id}/analyze:
+ * /sessions/{id}/analyze:
  *   post:
- *     summary: Run AI analysis on a meeting transcript
+ *     summary: Run AI analysis on a mentorship session transcript
  *     description: |
- *       Sends the meeting transcript to the Groq LLM API for analysis.
+ *       Sends the mentorship session transcript to the Groq LLM API for analysis.
  *       Returns summary, actionItems, decisions, and followUpSuggestions - all with validated citations.
  *       Retries once on LLM failure before returning 502.
  *       Auto-creates ActionItem records from the analysis result.
@@ -38,7 +38,7 @@ const analysisLimiter = rateLimit({
  *         schema:
  *           type: string
  *           format: uuid
- *         description: Meeting ID to analyze
+ *         description: Session ID to analyze
  *     responses:
  *       200:
  *         description: Analysis completed successfully
@@ -58,7 +58,7 @@ const analysisLimiter = rateLimit({
  *                     id:
  *                       type: string
  *                       format: uuid
- *                     meetingId:
+ *                     sessionId:
  *                       type: string
  *                       format: uuid
  *                     summary:
@@ -102,12 +102,12 @@ const analysisLimiter = rateLimit({
  *       401:
  *         description: Unauthorized
  *       404:
- *         description: Meeting not found
+ *         description: Session not found
  *       409:
- *         description: Analysis already exists for this meeting
+ *         description: Analysis already exists for this session
  *       502:
  *         description: AI analysis failed after retry (LLM_ERROR)
  */
-router.post('/:id/analyze', authenticate, analysisLimiter, validate(UuidParamSchema, 'params'), analysisController.analyzeMeeting);
+router.post('/:id/analyze', authenticate, analysisLimiter, validate(UuidParamSchema, 'params'), analysisController.analyzeSession);
 
 export default router;

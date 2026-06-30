@@ -8,7 +8,7 @@ services:
       - PORT=3000
       - NODE_ENV=production
       - JWT_SECRET=your-jwt-secret-here
-      - DATABASE_URL=postgresql://postgres:password@db:5432/hintro_db
+      - DATABASE_URL=postgresql://postgres:password@db:5432/vectorify_db
       - GEMINI_API_KEY=your-groq-key-here
       - RESEND_API_KEY=your-resend-key-here
       - REDIS_URL=redis://redis:6379
@@ -28,7 +28,7 @@ services:
     image: postgres:15-alpine
     environment:
       - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=hintro_db
+      - POSTGRES_DB=vectorify_db
     ports:
       - "5432:5432"
     volumes:

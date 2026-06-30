@@ -4,11 +4,11 @@ const swaggerOptions: swaggerJsdoc.Options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Meeting Intelligence API',
+      title: 'Vectorify Mentorship Intelligence API',
       version: '1.0.0',
-      description: 'Hintro Meeting Intelligence Service - AI-powered meeting analysis, action item tracking, and automated reminders.',
+      description: 'Vectorify Mentorship Intelligence Service - AI-powered analysis of mentor-student sessions, student task tracking, and automated reminders for JEE/NEET aspirants.',
       contact: {
-        name: 'Hintro API Support',
+        name: 'Vectorify API Support',
       },
     },
     servers: [

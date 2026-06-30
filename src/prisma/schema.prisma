@@ -12,45 +12,45 @@ model User {
   email        String    @unique
   passwordHash String
   createdAt    DateTime  @default(now())
-  meetings     Meeting[]
+  sessions     Session[]
 }
 
-model Meeting {
+model Session {
   id           String           @id @default(uuid())
   userId       String
   user         User             @relation(fields: [userId], references: [id])
   title        String
   participants String[]
-  meetingDate  DateTime
+  sessionDate  DateTime
   transcript   Json
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
-  analysis     MeetingAnalysis?
+  analysis     SessionAnalysis?
   actionItems  ActionItem[]
 }
 
-model MeetingAnalysis {
-  id                String   @id @default(uuid())
-  meetingId         String   @unique
-  meeting           Meeting  @relation(fields: [meetingId], references: [id])
-  summary           Json
-  actionItems       Json
-  decisions         Json
+model SessionAnalysis {
+  id                  String   @id @default(uuid())
+  sessionId           String   @unique
+  session             Session  @relation(fields: [sessionId], references: [id])
+  summary             Json
+  actionItems         Json
+  decisions           Json
   followUpSuggestions Json
-  createdAt         DateTime @default(now())
+  createdAt           DateTime @default(now())
 }
 
 model ActionItem {
-  id        String       @id @default(uuid())
-  meetingId String
-  meeting   Meeting      @relation(fields: [meetingId], references: [id])
+  id        String        @id @default(uuid())
+  sessionId String
+  session   Session       @relation(fields: [sessionId], references: [id])
   task      String
   assignee  String
-  status    ActionStatus @default(PENDING)
+  status    ActionStatus  @default(PENDING)
   dueDate   DateTime?
   citations Json?
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
   reminders ReminderLog[]
 }
 

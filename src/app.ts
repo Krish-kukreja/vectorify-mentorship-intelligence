@@ -12,7 +12,7 @@ import { successResponse, errorResponse } from './utils/response';
 import { env } from './config/env';
 import { prisma } from './utils/prisma';
 import authRoutes from './modules/auth/auth.routes';
-import meetingRoutes from './modules/meetings/meetings.routes';
+import sessionRoutes from './modules/sessions/sessions.routes';
 import analysisRoutes from './modules/analysis/analysis.routes';
 import actionItemRoutes from './modules/actionItems/actionItems.routes';
 
@@ -62,7 +62,7 @@ app.use(globalLimiter);
  */
 // Root route for default Railway Healthcheck
 app.get('/', (req, res) => {
-  res.status(200).send('Hintro Meeting Intelligence API is running');
+  res.status(200).send('Vectorify Mentorship Intelligence API is running');
 });
 
 // Health check! Railway pings this to make sure we're actually alive and connected to the DB
@@ -92,14 +92,14 @@ app.get('/api/evaluation', (req, res) => {
       {
         candidateName: 'Krish Kukreja',
         email: 'iamkrish.kukreja@gmail.com',
-        repositoryUrl: 'https://github.com/Krish-kukreja/hintro-meeting-intelligence',
-        deployedUrl: 'https://hintro-meeting-intelligence-production.up.railway.app',
+        repositoryUrl: 'https://github.com/Krish-kukreja/vectorify-mentorship-intelligence',
+        deployedUrl: 'https://vectorify-mentorship-intelligence-production.up.railway.app',
         externalIntegration: 'Resend Email API',
         features: [
           'Authentication',
-          'Meeting Management',
-          'AI Analysis',
-          'Action Item Management',
+          'Mentorship Session Management',
+          'AI Session Analysis',
+          'Student Task Management',
           'Overdue Detection',
           'Scheduled Reminders',
           'Email Integration',
@@ -112,15 +112,15 @@ app.get('/api/evaluation', (req, res) => {
 
 // Exposing the Swagger docs publicly so the reviewers can actually test it out!
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
-  customSiteTitle: 'Hintro API Docs',
+  customSiteTitle: 'Vectorify API Docs',
   customCss: '.swagger-ui .topbar { display: none }',
 }));
 
 // ── API Routes ──
 
 app.use('/api/auth', authRoutes);
-app.use('/api/meetings', meetingRoutes);
-app.use('/api/meetings', analysisRoutes);
+app.use('/api/sessions', sessionRoutes);
+app.use('/api/sessions', analysisRoutes);
 app.use('/api/action-items', actionItemRoutes);
 
 // 404 Catch-All Handler

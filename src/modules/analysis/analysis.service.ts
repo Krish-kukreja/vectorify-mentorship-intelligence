@@ -58,28 +58,28 @@ async function callLLMWithRetry(prompt: string, traceId: string): Promise<string
   }
 }
 
-export async function analyzeMeeting(userId: string, meetingId: string, traceId: string) {
-  logger.info('Starting meeting analysis', { traceId, userId, meetingId });
+export async function analyzeSession(userId: string, sessionId: string, traceId: string) {
+  logger.info('Starting session analysis', { traceId, userId, sessionId });
 
-  // 1. Verify meeting exists and belongs to user
-  const meeting = await prisma.meeting.findUnique({
-    where: { id: meetingId },
+  // 1. Verify session exists and belongs to user
+  const session = await prisma.session.findUnique({
+    where: { id: sessionId },
     include: { analysis: true },
   });
 
-  if (!meeting || meeting.userId !== userId) {
-    logger.warn('Meeting not found or access denied for analysis', { traceId, meetingId, userId });
+  if (!session || session.userId !== userId) {
+    logger.warn('Session not found or access denied for analysis', { traceId, sessionId, userId });
     return { error: 'NOT_FOUND' };
   }
 
   // 2. Check if analysis already exists
-  if (meeting.analysis) {
-    logger.info('Analysis already exists for meeting', { traceId, meetingId });
-    return { error: 'CONFLICT', existing: meeting.analysis };
+  if (session.analysis) {
+    logger.info('Analysis already exists for session', { traceId, sessionId });
+    return { error: 'CONFLICT', existing: session.analysis };
   }
 
   // 3. Build prompt and call LLM
-  const transcript = meeting.transcript as any[];
+  const transcript = session.transcript as any[];
   const prompt = buildPrompt(transcript);
 
   let responseText: string;
@@ -109,10 +109,10 @@ export async function analyzeMeeting(userId: string, meetingId: string, traceId:
   // 6. Validate citations
   const cleanedAnalysis = validateCitations(analysisData, transcript, traceId);
 
-  // 7. Save MeetingAnalysis to DB
-  const savedAnalysis = await prisma.meetingAnalysis.create({
+  // 7. Save SessionAnalysis to DB
+  const savedAnalysis = await prisma.sessionAnalysis.create({
     data: {
-      meetingId,
+      sessionId,
       summary: cleanedAnalysis.summary as any,
       actionItems: cleanedAnalysis.actionItems as any,
       decisions: cleanedAnalysis.decisions as any,
@@ -120,12 +120,12 @@ export async function analyzeMeeting(userId: string, meetingId: string, traceId:
     },
   });
 
-  logger.info('Meeting analysis saved', { traceId, analysisId: savedAnalysis.id, meetingId });
+  logger.info('Session analysis saved', { traceId, analysisId: savedAnalysis.id, sessionId });
 
   // 8. Auto-create ActionItems from analysis.actionItems
   if (Array.isArray(cleanedAnalysis.actionItems) && cleanedAnalysis.actionItems.length > 0) {
     const actionItemsData = cleanedAnalysis.actionItems.map((item: any) => ({
-      meetingId,
+      sessionId,
       task: item.task || 'Untitled action item',
       assignee: item.assignee || 'unassigned',
       status: 'PENDING' as const,
@@ -139,7 +139,7 @@ export async function analyzeMeeting(userId: string, meetingId: string, traceId:
 
     logger.info('Action items auto-created from analysis', {
       traceId,
-      meetingId,
+      sessionId,
       count: actionItemsData.length,
     });
   }

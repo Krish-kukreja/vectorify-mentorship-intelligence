@@ -1,12 +1,12 @@
 # Architecture Decisions
 
-This document explains the rationale behind key technology choices for the Hintro Meeting Intelligence Service.
+This document explains the rationale behind key technology choices for the Vectorify Mentorship Intelligence Service.
 
 ---
 
 ## PostgreSQL - Relational Integrity
 
-**Why:** Meeting data has strong relational requirements - users own meetings, meetings have analyses, analyses produce action items, and action items have reminder logs. PostgreSQL enforces referential integrity (foreign keys, cascading deletes) at the database level, preventing orphaned records.
+**Why:** Mentorship data has strong relational requirements - mentors own sessions, sessions have analyses, analyses produce action items, and action items have reminder logs. PostgreSQL enforces referential integrity (foreign keys, cascading deletes) at the database level, preventing orphaned records.
 
 **Alternatives considered:**
 - **MongoDB** - flexible schema but no native joins or FK enforcement. Would require application-level integrity checks, increasing bug surface.
@@ -30,7 +30,7 @@ This document explains the rationale behind key technology choices for the Hintr
 **Why:** Groq API (LLaMA 3) was selected for three reasons:
 1. **Free tier** - generous free quota suitable for hackathon and early-stage usage.
 2. **JSON mode** - `responseMimeType: 'application/json'` enforces structured output, eliminating regex parsing of markdown/text responses.
-3. **Large context window** - 1M tokens handles even lengthy meeting transcripts without chunking.
+3. **Large context window** - handles even lengthy session transcripts without chunking.
 
 **Alternatives considered:**
 - **GPT-4o** - stronger reasoning but significantly higher cost and no free tier.

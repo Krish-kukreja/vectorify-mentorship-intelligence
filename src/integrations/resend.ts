@@ -27,12 +27,13 @@ export async function sendReminderEmail(
 
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-      <h2 style="color: #d32f2f;">Action Item Overdue</h2>
+      <h2 style="color: #d32f2f;">Pending task from your Vectorify session</h2>
+      <p>Hi, this is a reminder from your Vectorify mentor about a task that is now overdue.</p>
       <p><strong>Task:</strong> ${safeTask}</p>
-      <p><strong>Assigned To:</strong> ${safeAssignee}</p>
+      <p><strong>For:</strong> ${safeAssignee}</p>
       <p><strong>Due Date:</strong> ${safeDueDate}</p>
       <hr style="border: 1px solid #eee;" />
-      <p style="color: #666;">Please update the status of this action item.</p>
+      <p style="color: #666;">Please complete it and update its status so your mentor can track your progress.</p>
     </div>
   `;
 
@@ -40,7 +41,7 @@ export async function sendReminderEmail(
     const { data, error } = await resend.emails.send({
       from: 'onboarding@resend.dev',
       to: item.assignee,
-      subject: `⏰ Overdue: ${safeTask}`,
+      subject: `⏰ Vectorify reminder - overdue: ${safeTask}`,
       html: htmlContent,
     });
 

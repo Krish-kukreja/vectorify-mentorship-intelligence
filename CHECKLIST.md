@@ -12,7 +12,7 @@ Mark completed items with `[x]`.
 [x] Unified API response format implemented
 [x] Request trace ID implemented and included in logs
 
-[x] Meeting analysis endpoint implemented
+[x] Session analysis endpoint implemented
 [x] AI-generated insights include transcript citations
 [x] Hallucination prevention / grounding strategy implemented
 

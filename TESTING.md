@@ -9,7 +9,7 @@
 | Suite | File | Tests | Coverage |
 |-------|------|-------|----------|
 | Auth | `src/__tests__/auth.test.ts` | 8 | Register, login, validation, duplicates |
-| Meetings | `src/__tests__/meetings.test.ts` | 10 | CRUD, pagination, date filtering, validation |
+| Sessions | `src/__tests__/sessions.test.ts` | 10 | CRUD, pagination, date filtering, validation |
 | Analysis | `src/__tests__/analysis.test.ts` | 5 | AI analysis, conflicts, Groq failures, citations |
 | Action Items | `src/__tests__/actionItems.test.ts` | 11 | CRUD, status updates, filtering, overdue logic |
 
@@ -30,11 +30,11 @@
 
 ---
 
-## Meetings Module - 10 Tests
+## Sessions Module - 10 Tests
 
 | # | Test Case | Expected | Edge Case |
 |---|-----------|----------|-----------|
-| 1 | Create meeting with valid data | 201, meeting object | All required fields present |
+| 1 | Create session with valid data | 201, session object | All required fields present |
 | 2 | Create without auth token | 401 UNAUTHORIZED | No Authorization header |
 | 3 | Create with empty title | 400 VALIDATION_ERROR | `title: ""` |
 | 4 | Create with empty transcript | 400 VALIDATION_ERROR | `transcript: []` - must have ≥1 entry |
@@ -42,7 +42,7 @@
 | 6 | List with pagination | 200, pagination metadata | Verifies total, page, totalPages |
 | 7 | List with date range filter | 200, filtered results | `from` and `to` query params |
 | 8 | List with limit > 100 | 400 VALIDATION_ERROR | Zod max(100) enforcement |
-| 9 | Get by valid ID | 200, full meeting | Includes analysis + actionItems |
+| 9 | Get by valid ID | 200, full session | Includes analysis + actionItems |
 | 10 | Get by nonexistent ID | 404 NOT_FOUND | - |
 
 ---
@@ -51,9 +51,9 @@
 
 | # | Test Case | Expected | Edge Case |
 |---|-----------|----------|-----------|
-| 1 | Analyze meeting successfully | 200, all 4 fields | Verifies auto-created ActionItems |
-| 2 | Analyze already-analyzed meeting | 409 CONFLICT | `meeting.analysis` is not null |
-| 3 | Analyze nonexistent meeting | 404 NOT_FOUND | - |
+| 1 | Analyze session successfully | 200, all 4 fields | Verifies auto-created ActionItems |
+| 2 | Analyze already-analyzed session | 409 CONFLICT | `session.analysis` is not null |
+| 3 | Analyze nonexistent session | 404 NOT_FOUND | - |
 | 4 | Groq fails twice | 502 LLM_ERROR | Both attempts throw | 
 | 5 | Citation validation | Strips invalid timestamps | `"99:99"` and `"FAKE"` removed, valid kept |
 
@@ -69,9 +69,9 @@ The test creates an analysis result with 4 citations - 2 valid (matching transcr
 
 | # | Test Case | Expected | Edge Case |
 |---|-----------|----------|-----------|
-| 1 | Create with valid data | 201, action item object | Includes meetingId, dueDate |
+| 1 | Create with valid data | 201, action item object | Includes sessionId, dueDate |
 | 2 | Create with invalid assignee email | 400 VALIDATION_ERROR | `"not-an-email"` |
-| 3 | Create with nonexistent meeting | 404 NOT_FOUND | Meeting ownership check |
+| 3 | Create with nonexistent session | 404 NOT_FOUND | Session ownership check |
 | 4 | Create with missing task | 400 VALIDATION_ERROR | `task` field required |
 | 5 | Update status to COMPLETED | 200, updated item | Verifies new status value |
 | 6 | Update with invalid status | 400 VALIDATION_ERROR | `"INVALID_STATUS"` - not in enum |
@@ -91,7 +91,7 @@ All tests mock at the Prisma layer:
 jest.mock('../utils/prisma', () => ({
   prisma: {
     user: { create: jest.fn(), findUnique: jest.fn() },
-    meeting: { create: jest.fn(), findUnique: jest.fn(), findMany: jest.fn(), count: jest.fn() },
+    session: { create: jest.fn(), findUnique: jest.fn(), findMany: jest.fn(), count: jest.fn() },
     // ... etc
   },
 }));

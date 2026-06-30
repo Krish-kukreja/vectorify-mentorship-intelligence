@@ -1,4 +1,8 @@
-# HINTRO CONTEXT - Paste at top of every prompt
+# VECTORIFY CONTEXT - Paste at top of every prompt
+
+## Product
+Vectorify Mentorship Intelligence Service - backend for the IIT Kharagpur JEE/NEET mentorship program.
+Mentors log one-on-one session transcripts; AI extracts concepts covered, weak areas, student tasks, and next steps.
 
 ## Tech Stack
 Node.js 20+, TypeScript 5.x, Express 4.18.2, PostgreSQL 15+, Prisma 5.x
@@ -15,143 +19,41 @@ Groq API (LLaMA 3), Resend, Jest + Supertest, Swagger UI
 - bcryptjs saltRounds = 10
 
 ## Prisma Schema
-File location: src/prisma/schema.prisma. Copy this entire block verbatim. Do not rename any field.
+File location: src/prisma/schema.prisma. Models:
 
-generator client {
+model User { id, email (unique), passwordHash, createdAt, sessions Session[] }
 
-provider = "prisma-client-js"
-
+model Session {
+  id, userId, user User @relation, title, participants String[],
+  sessionDate DateTime, transcript Json, createdAt, updatedAt,
+  analysis SessionAnalysis?, actionItems ActionItem[]
 }
 
-datasource db {
-
-provider = "postgresql"
-
-url = env("DATABASE_URL")
-
-}
-
-model User {
-
-id String @id @default(uuid())
-
-email String @unique
-
-passwordHash String
-
-createdAt DateTime @default(now())
-
-meetings Meeting\[\]
-
-}
-
-model Meeting {
-
-id String @id @default(uuid())
-
-userId String
-
-user User @relation(fields: \[userId\], references: \[id\])
-
-title String
-
-participants String\[\]
-
-meetingDate DateTime
-
-transcript Json
-
-createdAt DateTime @default(now())
-
-updatedAt DateTime @updatedAt
-
-analysis MeetingAnalysis?
-
-actionItems ActionItem\[\]
-
-}
-
-model MeetingAnalysis {
-
-id String @id @default(uuid())
-
-meetingId String @unique
-
-meeting Meeting @relation(fields: \[meetingId\], references: \[id\])
-
-summary Json
-
-actionItems Json
-
-decisions Json
-
-followUpSuggestions Json
-
-createdAt DateTime @default(now())
-
+model SessionAnalysis {
+  id, sessionId (unique), session Session @relation,
+  summary Json, actionItems Json, decisions Json, followUpSuggestions Json, createdAt
 }
 
 model ActionItem {
-
-id String @id @default(uuid())
-
-meetingId String
-
-meeting Meeting @relation(fields: \[meetingId\], references: \[id\])
-
-task String
-
-assignee String
-
-status ActionStatus @default(PENDING)
-
-dueDate DateTime?
-
-citations Json?
-
-createdAt DateTime @default(now())
-
-updatedAt DateTime @updatedAt
-
-reminders ReminderLog\[\]
-
+  id, sessionId, session Session @relation, task, assignee,
+  status ActionStatus @default(PENDING), dueDate DateTime?, citations Json?,
+  createdAt, updatedAt, reminders ReminderLog[]
 }
 
-enum ActionStatus {
-
-PENDING
-
-IN_PROGRESS
-
-COMPLETED
-
-}
+enum ActionStatus { PENDING, IN_PROGRESS, COMPLETED }
 
 model ReminderLog {
-
-id String @id @default(uuid())
-
-actionItemId String
-
-actionItem ActionItem @relation(fields: \[actionItemId\], references: \[id\])
-
-channel String
-
-deliveryStatus String
-
-response String?
-
-sentAt DateTime @default(now())
-
+  id, actionItemId, actionItem ActionItem @relation,
+  channel, deliveryStatus, response String?, sentAt
 }
 
 ## API Endpoints
 POST /api/auth/register (public, 201)
 POST /api/auth/login (public, 200)
-POST /api/meetings (protected, 201)
-GET /api/meetings (protected, 200)
-GET /api/meetings/:id (protected, 200)
-POST /api/meetings/:id/analyze (protected, 200)
+POST /api/sessions (protected, 201)
+GET /api/sessions (protected, 200)
+GET /api/sessions/:id (protected, 200)
+POST /api/sessions/:id/analyze (protected, 200)
 POST /api/action-items (protected, 201)
 GET /api/action-items (protected, 200)
 PATCH /api/action-items/:id/status (protected, 200)
@@ -163,10 +65,11 @@ GET /api/docs (public, Swagger UI)
 ## Env Vars
 File location: .env (root) or Railway Dashboard → Settings → Environment Variables
 
-PORT=3001
+PORT=3000
 NODE_ENV=development
 JWT_SECRET=<generate-strong-random-32-char-string>
 DATABASE_URL=<from-railway-postgresql-plugin>
-GROQ_API_KEY=<from-google-ai-studio>
+GEMINI_API_KEY=<groq-api-key>
 RESEND_API_KEY=<from-resend-dashboard>
+REDIS_URL=redis://localhost:6379
 REMINDER_CRON_SCHEDULE=*/5 * * * *  // every 5 minutes

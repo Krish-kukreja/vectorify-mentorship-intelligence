@@ -1,22 +1,22 @@
 import { Router } from 'express';
 import { validate } from '../../middleware/validate';
 import { authenticate } from '../../middleware/auth';
-import { CreateMeetingSchema } from './meetings.schema';
+import { CreateSessionSchema } from './sessions.schema';
 import { UuidParamSchema } from '../../utils/uuid.schema';
-import * as meetingsController from './meetings.controller';
+import * as sessionsController from './sessions.controller';
 
 const router = Router();
 
-// All meeting routes require authentication
+// All session routes require authentication
 router.use(authenticate);
 
 /**
  * @swagger
- * /meetings:
+ * /sessions:
  *   post:
- *     summary: Create a new meeting
- *     description: Stores a meeting with its transcript for later AI analysis. Requires authentication.
- *     tags: [Meetings]
+ *     summary: Create a new mentorship session
+ *     description: Stores a mentor-student session with its transcript for later AI analysis. Requires authentication.
+ *     tags: [Sessions]
  *     security:
  *       - BearerAuth: []
  *     requestBody:
@@ -25,18 +25,18 @@ router.use(authenticate);
  *         application/json:
  *           schema:
  *             type: object
- *             required: [title, participants, meetingDate, transcript]
+ *             required: [title, participants, sessionDate, transcript]
  *             properties:
  *               title:
  *                 type: string
- *                 example: Sprint Planning Q3
+ *                 example: Physics - Rotational Motion Doubt Session
  *               participants:
  *                 type: array
  *                 items:
  *                   type: string
  *                   format: email
- *                 example: ["alice@example.com", "bob@example.com"]
- *               meetingDate:
+ *                 example: ["mentor@vectorify.in", "aspirant@example.com"]
+ *               sessionDate:
  *                 type: string
  *                 format: date-time
  *                 example: "2024-06-01T10:00:00.000Z"
@@ -52,27 +52,27 @@ router.use(authenticate);
  *                       example: "00:01"
  *                     speaker:
  *                       type: string
- *                       example: Alice
+ *                       example: Mentor
  *                     text:
  *                       type: string
- *                       example: Let us discuss the roadmap.
+ *                       example: Let us review where you got stuck on torque problems.
  *     responses:
  *       201:
- *         description: Meeting created successfully
+ *         description: Session created successfully
  *       400:
  *         description: Validation error
  *       401:
  *         description: Unauthorized - missing or invalid JWT
  */
-router.post('/', validate(CreateMeetingSchema), meetingsController.createMeeting);
+router.post('/', validate(CreateSessionSchema), sessionsController.createSession);
 
 /**
  * @swagger
- * /meetings:
+ * /sessions:
  *   get:
- *     summary: List meetings with pagination and date filtering
- *     description: Returns paginated meetings for the authenticated user. Supports optional date range filtering.
- *     tags: [Meetings]
+ *     summary: List mentorship sessions with pagination and date filtering
+ *     description: Returns paginated sessions for the authenticated mentor. Supports optional date range filtering.
+ *     tags: [Sessions]
  *     security:
  *       - BearerAuth: []
  *     parameters:
@@ -96,30 +96,30 @@ router.post('/', validate(CreateMeetingSchema), meetingsController.createMeeting
  *         schema:
  *           type: string
  *           format: date-time
- *         description: Filter meetings on or after this date (ISO 8601)
+ *         description: Filter sessions on or after this date (ISO 8601)
  *       - in: query
  *         name: to
  *         schema:
  *           type: string
  *           format: date-time
- *         description: Filter meetings on or before this date (ISO 8601)
+ *         description: Filter sessions on or before this date (ISO 8601)
  *     responses:
  *       200:
- *         description: Paginated list of meetings
+ *         description: Paginated list of sessions
  *       400:
  *         description: Validation error (e.g. limit > 100)
  *       401:
  *         description: Unauthorized
  */
-router.get('/', meetingsController.listMeetings);
+router.get('/', sessionsController.listSessions);
 
 /**
  * @swagger
- * /meetings/{id}:
+ * /sessions/{id}:
  *   get:
- *     summary: Get a meeting by ID
- *     description: Returns the full meeting record including analysis and action items if available.
- *     tags: [Meetings]
+ *     summary: Get a mentorship session by ID
+ *     description: Returns the full session record including analysis and action items if available.
+ *     tags: [Sessions]
  *     security:
  *       - BearerAuth: []
  *     parameters:
@@ -129,15 +129,15 @@ router.get('/', meetingsController.listMeetings);
  *         schema:
  *           type: string
  *           format: uuid
- *         description: Meeting UUID
+ *         description: Session UUID
  *     responses:
  *       200:
- *         description: Meeting details with analysis and action items
+ *         description: Session details with analysis and action items
  *       401:
  *         description: Unauthorized
  *       404:
- *         description: Meeting not found
+ *         description: Session not found
  */
-router.get('/:id', validate(UuidParamSchema, 'params'), meetingsController.getMeeting);
+router.get('/:id', validate(UuidParamSchema, 'params'), sessionsController.getSession);
 
 export default router;

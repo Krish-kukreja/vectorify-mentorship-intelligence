@@ -30,7 +30,7 @@ export function startReminderScheduler(): void {
           },
         },
         include: {
-          meeting: { select: { title: true } },
+          session: { select: { title: true } },
         },
       });
 

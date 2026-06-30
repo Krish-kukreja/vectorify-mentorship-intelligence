@@ -11,13 +11,13 @@ jest.mock('../utils/prisma', () => ({
       create: jest.fn(),
       findUnique: jest.fn(),
     },
-    meeting: {
+    session: {
       create: jest.fn(),
       findUnique: jest.fn(),
       findMany: jest.fn(),
       count: jest.fn(),
     },
-    meetingAnalysis: {
+    sessionAnalysis: {
       create: jest.fn(),
     },
     actionItem: {
@@ -63,7 +63,7 @@ jest.mock('groq-sdk', () => ({
 const mockedPrisma = prisma as jest.Mocked<typeof prisma>;
 
 const TEST_USER_ID = 'a0000000-0000-0000-0000-000000000001';
-const MEETING_ID = 'b0000000-0000-0000-0000-000000000002';
+const SESSION_ID = 'b0000000-0000-0000-0000-000000000002';
 const ACTION_ITEM_ID = 'c0000000-0000-0000-0000-000000000003';
 
 const TEST_JWT = jwt.sign(
@@ -72,12 +72,12 @@ const TEST_JWT = jwt.sign(
   { expiresIn: '7d' }
 );
 
-const mockMeeting = {
-  id: MEETING_ID,
+const mockSession = {
+  id: SESSION_ID,
   userId: TEST_USER_ID,
-  title: 'Sprint Planning',
-  participants: ['alice@example.com'],
-  meetingDate: new Date(),
+  title: 'Physics - Rotational Motion Doubt Session',
+  participants: ['aspirant@example.com'],
+  sessionDate: new Date(),
   transcript: [],
   createdAt: new Date(),
   updatedAt: new Date(),
@@ -85,15 +85,15 @@ const mockMeeting = {
 
 const mockActionItem = {
   id: ACTION_ITEM_ID,
-  meetingId: MEETING_ID,
-  task: 'Implement auth module',
-  assignee: 'bob@example.com',
+  sessionId: SESSION_ID,
+  task: 'Solve 20 rotational motion problems',
+  assignee: 'aspirant@example.com',
   status: 'PENDING',
   dueDate: new Date('2024-01-01T00:00:00.000Z'),
   citations: [],
   createdAt: new Date(),
   updatedAt: new Date(),
-  meeting: { title: 'Sprint Planning', userId: TEST_USER_ID },
+  session: { title: 'Physics - Rotational Motion Doubt Session', userId: TEST_USER_ID },
 };
 
 describe('Action Items Module', () => {
@@ -105,23 +105,23 @@ describe('Action Items Module', () => {
 
   describe('POST /api/action-items', () => {
     it('should create an action item and return 201', async () => {
-      (mockedPrisma.meeting.findUnique as jest.Mock).mockResolvedValue(mockMeeting);
+      (mockedPrisma.session.findUnique as jest.Mock).mockResolvedValue(mockSession);
       (mockedPrisma.actionItem.create as jest.Mock).mockResolvedValue(mockActionItem);
 
       const res = await request(app)
         .post('/api/action-items')
         .set('Authorization', `Bearer ${TEST_JWT}`)
         .send({
-          task: 'Implement auth module',
-          assignee: 'bob@example.com',
-          meetingId: MEETING_ID,
+          task: 'Solve 20 rotational motion problems',
+          assignee: 'aspirant@example.com',
+          sessionId: SESSION_ID,
           dueDate: '2024-01-01T00:00:00.000Z',
         });
 
       expect(res.status).toBe(201);
       expect(res.body.success).toBe(true);
       expect(res.body.data).toHaveProperty('id');
-      expect(res.body.data).toHaveProperty('task', 'Implement auth module');
+      expect(res.body.data).toHaveProperty('task', 'Solve 20 rotational motion problems');
     });
 
     it('should return 400 VALIDATION_ERROR for invalid assignee email', async () => {
@@ -131,7 +131,7 @@ describe('Action Items Module', () => {
         .send({
           task: 'Some task',
           assignee: 'not-an-email',
-          meetingId: MEETING_ID,
+          sessionId: SESSION_ID,
         });
 
       expect(res.status).toBe(400);
@@ -139,16 +139,16 @@ describe('Action Items Module', () => {
       expect(res.body.error.code).toBe('VALIDATION_ERROR');
     });
 
-    it('should return 404 when meeting does not exist', async () => {
-      (mockedPrisma.meeting.findUnique as jest.Mock).mockResolvedValue(null);
+    it('should return 404 when session does not exist', async () => {
+      (mockedPrisma.session.findUnique as jest.Mock).mockResolvedValue(null);
 
       const res = await request(app)
         .post('/api/action-items')
         .set('Authorization', `Bearer ${TEST_JWT}`)
         .send({
           task: 'Some task',
-          assignee: 'bob@example.com',
-          meetingId: '00000000-0000-0000-0000-000000000000',
+          assignee: 'aspirant@example.com',
+          sessionId: '00000000-0000-0000-0000-000000000000',
         });
 
       expect(res.status).toBe(404);
@@ -161,8 +161,8 @@ describe('Action Items Module', () => {
         .post('/api/action-items')
         .set('Authorization', `Bearer ${TEST_JWT}`)
         .send({
-          assignee: 'bob@example.com',
-          meetingId: MEETING_ID,
+          assignee: 'aspirant@example.com',
+          sessionId: SESSION_ID,
         });
 
       expect(res.status).toBe(400);
@@ -242,14 +242,14 @@ describe('Action Items Module', () => {
 
       const res = await request(app)
         .get('/api/action-items')
-        .query({ assignee: 'bob@example.com' })
+        .query({ assignee: 'aspirant@example.com' })
         .set('Authorization', `Bearer ${TEST_JWT}`);
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
 
       const findManyCall = (mockedPrisma.actionItem.findMany as jest.Mock).mock.calls[0][0];
-      expect(findManyCall.where.assignee).toBe('bob@example.com');
+      expect(findManyCall.where.assignee).toBe('aspirant@example.com');
     });
   });
 

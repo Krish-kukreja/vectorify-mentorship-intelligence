@@ -18,8 +18,8 @@ STRICT RULES:
 
 **Why these rules matter:**
 
-- **Rule 1** prevents the model from using its training data to "fill in" plausible but fabricated meeting content.
-- **Rule 2** explicitly bans hallucination of entities - the most dangerous failure mode in meeting analysis.
+- **Rule 1** prevents the model from using its training data to "fill in" plausible but fabricated session content.
+- **Rule 2** explicitly bans hallucination of entities - the most dangerous failure mode in mentorship session analysis.
 - **Rule 3** forces citation grounding - every claim must reference a specific transcript timestamp.
 - **Rule 4** tells the model that omission is preferred over fabrication, which is the correct default for business-critical analysis.
 

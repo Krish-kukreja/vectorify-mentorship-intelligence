@@ -1,32 +1,32 @@
-const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJmY2RmNWE5Ny1lYzhhLTRhOWEtOWFmYS01MTZlZWZiOTllMzMiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJpYXQiOjE3ODA2ODg3NTMsImV4cCI6MTc4MTI5MzU1M30.31sCPRfAFQJHAM_no5Z0X48y4GuBjtqctxBTbyjSLCU';
+const TOKEN = process.env.TOKEN || 'PASTE_A_JWT_FROM_POST_/api/auth/login';
 
 async function test() {
-  console.log('1. Creating Meeting...');
-  let res = await fetch('http://localhost:3000/api/meetings', {
+  console.log('1. Creating Session...');
+  let res = await fetch('http://localhost:3000/api/sessions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
     body: JSON.stringify({
-      title: "Sprint Planning",
-      participants: ["alice@example.com", "bob@example.com"],
-      meetingDate: "2026-06-06T10:00:00Z",
+      title: "Physics - Rotational Motion Doubt Session",
+      participants: ["mentor@vectorify.in", "aspirant@example.com"],
+      sessionDate: "2026-06-06T10:00:00Z",
       transcript: [
-        {timestamp: "00:10", speaker: "John", text: "We should launch next Friday."},
-        {timestamp: "00:20", speaker: "Alice", text: "I will prepare release notes."}
+        {timestamp: "00:10", speaker: "Mentor", text: "Let us start with where you got stuck on torque."},
+        {timestamp: "00:20", speaker: "Student", text: "I will redo the moment of inertia problems."}
       ]
     })
   });
   let data = await res.json();
   console.log(JSON.stringify(data, null, 2));
-  const meetingId = data.data.id;
+  const sessionId = data.data.id;
 
-  console.log('\n2. Listing Meetings...');
-  res = await fetch('http://localhost:3000/api/meetings', {
+  console.log('\n2. Listing Sessions...');
+  res = await fetch('http://localhost:3000/api/sessions', {
     headers: { 'Authorization': `Bearer ${TOKEN}` }
   });
   console.log(JSON.stringify(await res.json(), null, 2));
 
-  console.log(`\n3. Analyzing Meeting ${meetingId}...`);
-  res = await fetch(`http://localhost:3000/api/meetings/${meetingId}/analyze`, {
+  console.log(`\n3. Analyzing Session ${sessionId}...`);
+  res = await fetch(`http://localhost:3000/api/sessions/${sessionId}/analyze`, {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${TOKEN}` }
   });

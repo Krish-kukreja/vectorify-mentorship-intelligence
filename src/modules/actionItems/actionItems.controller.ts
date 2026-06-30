@@ -10,7 +10,7 @@ export async function createActionItem(req: Request, res: Response, next: NextFu
 
     if (result.error === 'NOT_FOUND') {
       res.status(404).json(
-        errorResponse('NOT_FOUND', 'Meeting not found', req.traceId)
+        errorResponse('NOT_FOUND', 'Session not found', req.traceId)
       );
       return;
     }

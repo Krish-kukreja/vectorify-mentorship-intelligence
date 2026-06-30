@@ -51,7 +51,7 @@ router.use(authenticate);
  *                       dueDate:
  *                         type: string
  *                         format: date-time
- *                       meeting:
+ *                       session:
  *                         type: object
  *                         properties:
  *                           title:
@@ -66,7 +66,7 @@ router.get('/overdue', actionItemsController.getOverdue);
  * /action-items:
  *   post:
  *     summary: Create a new action item
- *     description: Creates an action item linked to a meeting. The meeting must exist and belong to the authenticated user.
+ *     description: Creates an action item (student task) linked to a mentorship session. The session must exist and belong to the authenticated mentor.
  *     tags: [Action Items]
  *     security:
  *       - BearerAuth: []
@@ -76,17 +76,17 @@ router.get('/overdue', actionItemsController.getOverdue);
  *         application/json:
  *           schema:
  *             type: object
- *             required: [task, assignee, meetingId]
+ *             required: [task, assignee, sessionId]
  *             properties:
  *               task:
  *                 type: string
  *                 minLength: 1
- *                 example: Implement authentication module
+ *                 example: Solve 20 rotational motion problems from DC Pandey
  *               assignee:
  *                 type: string
  *                 format: email
- *                 example: bob@example.com
- *               meetingId:
+ *                 example: aspirant@example.com
+ *               sessionId:
  *                 type: string
  *                 format: uuid
  *               dueDate:
@@ -109,7 +109,7 @@ router.get('/overdue', actionItemsController.getOverdue);
  *       401:
  *         description: Unauthorized
  *       404:
- *         description: Meeting not found
+ *         description: Session not found
  */
 router.post('/', validate(CreateActionItemSchema), actionItemsController.createActionItem);
 
@@ -118,7 +118,7 @@ router.post('/', validate(CreateActionItemSchema), actionItemsController.createA
  * /action-items:
  *   get:
  *     summary: List action items with filters
- *     description: Returns paginated action items for the authenticated user. Supports filtering by status, assignee, and meetingId.
+ *     description: Returns paginated action items for the authenticated mentor. Supports filtering by status, assignee, and sessionId.
  *     tags: [Action Items]
  *     security:
  *       - BearerAuth: []
@@ -136,11 +136,11 @@ router.post('/', validate(CreateActionItemSchema), actionItemsController.createA
  *           format: email
  *         description: Filter by assignee email
  *       - in: query
- *         name: meetingId
+ *         name: sessionId
  *         schema:
  *           type: string
  *           format: uuid
- *         description: Filter by meeting ID
+ *         description: Filter by session ID
  *       - in: query
  *         name: page
  *         schema:
@@ -167,7 +167,7 @@ router.get('/', actionItemsController.listActionItems);
  * /action-items/{id}/status:
  *   patch:
  *     summary: Update action item status
- *     description: Updates the status of an action item. Only the meeting owner can update their action items.
+ *     description: Updates the status of an action item. Only the session owner can update their action items.
  *     tags: [Action Items]
  *     security:
  *       - BearerAuth: []

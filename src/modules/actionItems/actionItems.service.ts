@@ -5,24 +5,24 @@ import { CreateActionItemInput, ListActionItemsQuery } from './actionItems.schem
 import { getCache, setCache, invalidatePattern } from '../../utils/redis';
 
 export async function createActionItem(userId: string, data: CreateActionItemInput) {
-  logger.info('Creating action item', { userId, meetingId: data.meetingId });
+  logger.info('Creating action item', { userId, sessionId: data.sessionId });
 
-  // Verify meeting exists and belongs to the user
-  const meeting = await prisma.meeting.findUnique({
-    where: { id: data.meetingId },
+  // Verify session exists and belongs to the user
+  const session = await prisma.session.findUnique({
+    where: { id: data.sessionId },
   });
 
-  if (!meeting || meeting.userId !== userId) {
-    logger.warn('Meeting not found or access denied for action item creation', {
+  if (!session || session.userId !== userId) {
+    logger.warn('Session not found or access denied for action item creation', {
       userId,
-      meetingId: data.meetingId,
+      sessionId: data.sessionId,
     });
     return { error: 'NOT_FOUND' };
   }
 
   const actionItem = await prisma.actionItem.create({
     data: {
-      meetingId: data.meetingId,
+      sessionId: data.sessionId,
       task: data.task,
       assignee: data.assignee,
       dueDate: data.dueDate ? new Date(data.dueDate) : null,
@@ -30,7 +30,7 @@ export async function createActionItem(userId: string, data: CreateActionItemInp
     },
   });
 
-  logger.info('Action item created', { actionItemId: actionItem.id, meetingId: data.meetingId });
+  logger.info('Action item created', { actionItemId: actionItem.id, sessionId: data.sessionId });
 
   await invalidatePattern(`actionItems:${userId}:*`);
 
@@ -38,20 +38,20 @@ export async function createActionItem(userId: string, data: CreateActionItemInp
 }
 
 export async function listActionItems(userId: string, query: ListActionItemsQuery) {
-  const { status, assignee, meetingId, page, limit } = query;
+  const { status, assignee, sessionId, page, limit } = query;
   const skip = (page - 1) * limit;
 
-  logger.info('Listing action items', { userId, status, assignee, meetingId, page, limit });
+  logger.info('Listing action items', { userId, status, assignee, sessionId, page, limit });
 
   const where: any = {
-    meeting: { userId },
+    session: { userId },
   };
 
   if (status) where.status = status;
   if (assignee) where.assignee = assignee;
-  if (meetingId) where.meetingId = meetingId;
+  if (sessionId) where.sessionId = sessionId;
 
-  const cacheKey = `actionItems:${userId}:status${status || 'all'}:assignee${assignee || 'all'}:meeting${meetingId || 'all'}:page${page}:limit${limit}`;
+  const cacheKey = `actionItems:${userId}:status${status || 'all'}:assignee${assignee || 'all'}:session${sessionId || 'all'}:page${page}:limit${limit}`;
   const cached = await getCache<{ actionItems: any[], pagination: any }>(cacheKey);
   if (cached) {
     logger.info('ActionItems cache hit', { cacheKey, userId });
@@ -65,7 +65,7 @@ export async function listActionItems(userId: string, query: ListActionItemsQuer
       take: limit,
       orderBy: { createdAt: 'desc' },
       include: {
-        meeting: { select: { title: true } },
+        session: { select: { title: true } },
       },
     }),
     prisma.actionItem.count({ where }),
@@ -90,13 +90,13 @@ export async function listActionItems(userId: string, query: ListActionItemsQuer
 export async function updateStatus(userId: string, actionItemId: string, status: string) {
   logger.info('Updating action item status', { userId, actionItemId, status });
 
-  // Find the action item and verify ownership through meeting
+  // Find the action item and verify ownership through session
   const actionItem = await prisma.actionItem.findUnique({
     where: { id: actionItemId },
-    include: { meeting: { select: { userId: true } } },
+    include: { session: { select: { userId: true } } },
   });
 
-  if (!actionItem || actionItem.meeting.userId !== userId) {
+  if (!actionItem || actionItem.session.userId !== userId) {
     logger.warn('Action item not found or access denied', { userId, actionItemId });
     return { error: 'NOT_FOUND' };
   }
@@ -120,12 +120,12 @@ export async function getOverdue(userId: string) {
 
   const overdueItems = await prisma.actionItem.findMany({
     where: {
-      meeting: { userId },
+      session: { userId },
       status: { not: 'COMPLETED' },
       dueDate: { lt: now },
     },
     include: {
-      meeting: { select: { title: true } },
+      session: { select: { title: true } },
     },
     orderBy: { dueDate: 'asc' },
   });

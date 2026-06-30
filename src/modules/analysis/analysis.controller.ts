@@ -2,23 +2,23 @@ import { Request, Response, NextFunction } from 'express';
 import * as analysisService from './analysis.service';
 import { successResponse, errorResponse } from '../../utils/response';
 
-export async function analyzeMeeting(req: Request, res: Response, next: NextFunction): Promise<void> {
+export async function analyzeSession(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const userId = req.userId!;
-    const meetingId = req.params.id;
+    const sessionId = req.params.id;
 
-    const result = await analysisService.analyzeMeeting(userId, meetingId, req.traceId);
+    const result = await analysisService.analyzeSession(userId, sessionId, req.traceId);
 
     if (result.error === 'NOT_FOUND') {
       res.status(404).json(
-        errorResponse('NOT_FOUND', 'Meeting not found', req.traceId)
+        errorResponse('NOT_FOUND', 'Session not found', req.traceId)
       );
       return;
     }
 
     if (result.error === 'CONFLICT') {
       res.status(409).json(
-        errorResponse('CONFLICT', 'Analysis already exists for this meeting', req.traceId)
+        errorResponse('CONFLICT', 'Analysis already exists for this session', req.traceId)
       );
       return;
     }

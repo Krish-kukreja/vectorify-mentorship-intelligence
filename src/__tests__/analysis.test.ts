@@ -12,13 +12,13 @@ jest.mock('../utils/prisma', () => ({
       create: jest.fn(),
       findUnique: jest.fn(),
     },
-    meeting: {
+    session: {
       create: jest.fn(),
       findUnique: jest.fn(),
       findMany: jest.fn(),
       count: jest.fn(),
     },
-    meetingAnalysis: {
+    sessionAnalysis: {
       create: jest.fn(),
     },
     actionItem: {
@@ -61,7 +61,7 @@ const mockedPrisma = prisma as jest.Mocked<typeof prisma>;
 const { __mockCreate: mockGenerateContent } = jest.requireMock('groq-sdk');
 
 const TEST_USER_ID = 'user-uuid-123';
-const MEETING_ID = 'meeting-uuid-456';
+const SESSION_ID = 'session-uuid-456';
 const TEST_JWT = jwt.sign(
   { userId: TEST_USER_ID, email: 'test@example.com' },
   'test-jwt-secret-key-for-testing!',
@@ -69,32 +69,32 @@ const TEST_JWT = jwt.sign(
 );
 
 const mockTranscript = [
-  { timestamp: '00:01', speaker: 'Alice', text: 'Let us discuss the roadmap.' },
-  { timestamp: '00:05', speaker: 'Bob', text: 'I suggest we prioritize the auth module.' },
-  { timestamp: '00:10', speaker: 'Alice', text: 'Agreed. Bob will handle auth by Friday.' },
+  { timestamp: '00:01', speaker: 'Mentor', text: 'Let us review your study plan.' },
+  { timestamp: '00:05', speaker: 'Mentor', text: 'I suggest we prioritize rotational motion.' },
+  { timestamp: '00:10', speaker: 'Mentor', text: 'Agreed. Solve 20 problems by Friday.' },
 ];
 
 const mockGeminiResponse = {
   summary: [
-    { text: 'Team discussed roadmap priorities.', citations: [{ timestamp: '00:01' }] },
+    { text: 'Reviewed study plan priorities.', citations: [{ timestamp: '00:01' }] },
   ],
   actionItems: [
-    { task: 'Handle auth module', assignee: 'bob@example.com', citations: [{ timestamp: '00:10' }] },
+    { task: 'Solve 20 rotational motion problems', assignee: 'aspirant@example.com', citations: [{ timestamp: '00:10' }] },
   ],
   decisions: [
-    { text: 'Auth module is top priority.', citations: [{ timestamp: '00:05' }] },
+    { text: 'Rotational motion is the top focus area.', citations: [{ timestamp: '00:05' }] },
   ],
   followUpSuggestions: [
-    { text: 'Schedule follow-up for auth progress.', citations: [{ timestamp: '00:10' }] },
+    { text: 'Schedule a follow-up to check problem-solving progress.', citations: [{ timestamp: '00:10' }] },
   ],
 };
 
-const mockMeetingNoAnalysis = {
-  id: MEETING_ID,
+const mockSessionNoAnalysis = {
+  id: SESSION_ID,
   userId: TEST_USER_ID,
-  title: 'Sprint Planning',
-  participants: ['alice@example.com', 'bob@example.com'],
-  meetingDate: new Date('2024-06-01T10:00:00.000Z'),
+  title: 'Physics - Rotational Motion Doubt Session',
+  participants: ['mentor@vectorify.in', 'aspirant@example.com'],
+  sessionDate: new Date('2024-06-01T10:00:00.000Z'),
   transcript: mockTranscript,
   createdAt: new Date(),
   updatedAt: new Date(),
@@ -103,7 +103,7 @@ const mockMeetingNoAnalysis = {
 
 const mockSavedAnalysis = {
   id: 'analysis-uuid-789',
-  meetingId: MEETING_ID,
+  sessionId: SESSION_ID,
   ...mockGeminiResponse,
   createdAt: new Date(),
 };
@@ -113,10 +113,10 @@ describe('Analysis Module', () => {
     jest.clearAllMocks();
   });
 
-  describe('POST /api/meetings/:id/analyze', () => {
-    it('should analyze a meeting and return 200 with all 4 fields', async () => {
-      (mockedPrisma.meeting.findUnique as jest.Mock).mockResolvedValue(mockMeetingNoAnalysis);
-      (mockedPrisma.meetingAnalysis.create as jest.Mock).mockResolvedValue(mockSavedAnalysis);
+  describe('POST /api/sessions/:id/analyze', () => {
+    it('should analyze a session and return 200 with all 4 fields', async () => {
+      (mockedPrisma.session.findUnique as jest.Mock).mockResolvedValue(mockSessionNoAnalysis);
+      (mockedPrisma.sessionAnalysis.create as jest.Mock).mockResolvedValue(mockSavedAnalysis);
       (mockedPrisma.actionItem.createMany as jest.Mock).mockResolvedValue({ count: 1 });
 
       mockGenerateContent.mockResolvedValue({
@@ -126,7 +126,7 @@ describe('Analysis Module', () => {
       });
 
       const res = await request(app)
-        .post(`/api/meetings/${MEETING_ID}/analyze`)
+        .post(`/api/sessions/${SESSION_ID}/analyze`)
         .set('Authorization', `Bearer ${TEST_JWT}`);
 
       expect(res.status).toBe(200);
@@ -141,9 +141,9 @@ describe('Analysis Module', () => {
       expect(mockedPrisma.actionItem.createMany).toHaveBeenCalledWith({
         data: expect.arrayContaining([
           expect.objectContaining({
-            meetingId: MEETING_ID,
-            task: 'Handle auth module',
-            assignee: 'bob@example.com',
+            sessionId: SESSION_ID,
+            task: 'Solve 20 rotational motion problems',
+            assignee: 'aspirant@example.com',
             status: 'PENDING',
             dueDate: null,
           }),
@@ -152,15 +152,15 @@ describe('Analysis Module', () => {
     });
 
     it('should return 409 CONFLICT when analysis already exists', async () => {
-      const meetingWithAnalysis = {
-        ...mockMeetingNoAnalysis,
+      const sessionWithAnalysis = {
+        ...mockSessionNoAnalysis,
         analysis: mockSavedAnalysis,
       };
 
-      (mockedPrisma.meeting.findUnique as jest.Mock).mockResolvedValue(meetingWithAnalysis);
+      (mockedPrisma.session.findUnique as jest.Mock).mockResolvedValue(sessionWithAnalysis);
 
       const res = await request(app)
-        .post(`/api/meetings/${MEETING_ID}/analyze`)
+        .post(`/api/sessions/${SESSION_ID}/analyze`)
         .set('Authorization', `Bearer ${TEST_JWT}`);
 
       expect(res.status).toBe(409);
@@ -168,11 +168,11 @@ describe('Analysis Module', () => {
       expect(res.body.error.code).toBe('CONFLICT');
     });
 
-    it('should return 404 when meeting does not exist', async () => {
-      (mockedPrisma.meeting.findUnique as jest.Mock).mockResolvedValue(null);
+    it('should return 404 when session does not exist', async () => {
+      (mockedPrisma.session.findUnique as jest.Mock).mockResolvedValue(null);
 
       const res = await request(app)
-        .post('/api/meetings/nonexistent-uuid/analyze')
+        .post('/api/sessions/nonexistent-uuid/analyze')
         .set('Authorization', `Bearer ${TEST_JWT}`);
 
       expect(res.status).toBe(404);
@@ -181,14 +181,14 @@ describe('Analysis Module', () => {
     });
 
     it('should return 502 LLM_ERROR when LLM fails twice', async () => {
-      (mockedPrisma.meeting.findUnique as jest.Mock).mockResolvedValue(mockMeetingNoAnalysis);
+      (mockedPrisma.session.findUnique as jest.Mock).mockResolvedValue(mockSessionNoAnalysis);
 
       mockGenerateContent
         .mockRejectedValueOnce(new Error('LLM rate limited'))
         .mockRejectedValueOnce(new Error('LLM still failing'));
 
       const res = await request(app)
-        .post(`/api/meetings/${MEETING_ID}/analyze`)
+        .post(`/api/sessions/${SESSION_ID}/analyze`)
         .set('Authorization', `Bearer ${TEST_JWT}`);
 
       expect(res.status).toBe(502);
@@ -202,7 +202,7 @@ describe('Analysis Module', () => {
       const analysisWithBadCitations = {
         summary: [
           {
-            text: 'Discussion about roadmap.',
+            text: 'Discussion about the study plan.',
             citations: [
               { timestamp: '00:01' },       // valid
               { timestamp: '99:99' },       // INVALID
@@ -212,7 +212,7 @@ describe('Analysis Module', () => {
         actionItems: [
           {
             task: 'Do something',
-            assignee: 'alice@example.com',
+            assignee: 'aspirant@example.com',
             citations: [
               { timestamp: '00:05' },       // valid
               { timestamp: 'FAKE' },        // INVALID

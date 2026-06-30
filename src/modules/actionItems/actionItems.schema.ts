@@ -7,7 +7,7 @@ const CitationSchema = z.object({
 export const CreateActionItemSchema = z.object({
   task: z.string().min(1, 'Task is required'),
   assignee: z.string().email('Assignee must be a valid email'),
-  meetingId: z.string().uuid('meetingId must be a valid UUID'),
+  sessionId: z.string().uuid('sessionId must be a valid UUID'),
   dueDate: z.string().datetime({ message: 'dueDate must be a valid ISO 8601 datetime' }).optional(),
   citations: z.array(CitationSchema).optional(),
 });
@@ -21,7 +21,7 @@ export const UpdateStatusSchema = z.object({
 export const ListActionItemsQuerySchema = z.object({
   status: z.enum(['PENDING', 'IN_PROGRESS', 'COMPLETED']).optional(),
   assignee: z.string().email().optional(),
-  meetingId: z.string().uuid().optional(),
+  sessionId: z.string().uuid().optional(),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(10),
 });

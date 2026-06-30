@@ -35,7 +35,7 @@ const logger = winston.createLogger({
     sanitizeFormat(),
     winston.format.json()
   ),
-  defaultMeta: { service: 'hintro-api' },
+  defaultMeta: { service: 'vectorify-mentorship-intelligence-api' },
   transports: [
     new winston.transports.Console({
       format: winston.format.combine(
