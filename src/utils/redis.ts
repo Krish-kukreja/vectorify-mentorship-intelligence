@@ -4,16 +4,26 @@ import logger from './logger';
 
 const redisUrl = env.REDIS_URL || 'redis://localhost:6379';
 
+// The cache is optional: getCache/setCache swallow errors and the app runs without it.
+// Log an unreachable Redis only once so it doesn't spam the logs every couple of seconds.
+let redisErrorLogged = false;
+
 export const redis = new Redis(redisUrl, {
-  retryStrategy: (times) => Math.min(times * 50, 2000),
+  family: 0, // resolve both IPv4 and IPv6 (Railway private networking is IPv6-only)
   maxRetriesPerRequest: 3,
+  enableOfflineQueue: false,
+  retryStrategy: (times) => Math.min(times * 200, 5000),
 });
 
 redis.on('error', (err) => {
-  logger.error('Redis connection error', { error: err.message });
+  if (!redisErrorLogged) {
+    logger.warn('Redis unavailable - continuing without cache', { error: err.message });
+    redisErrorLogged = true;
+  }
 });
 
 redis.on('connect', () => {
+  redisErrorLogged = false;
   logger.info('Redis connected successfully');
 });
 
